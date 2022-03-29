@@ -1,19 +1,23 @@
-import { Center, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Spinner, Stack, useDisclosure, Wrap, WrapItem } from "@chakra-ui/react";
+import { Center, Spinner, useDisclosure, Wrap, WrapItem } from "@chakra-ui/react";
 import { memo, useCallback, useEffect, VFC } from "react";
-import { useAllUsers } from "../../hooks/useAllUsers";
 
+import { useAllUsers } from "../../hooks/useAllUsers";
+import { useSelectUser } from "../../hooks/useSelectUser";
 import { UserCard } from '../organisms/user/UserCard';
 import { UserDetailModal } from "../organisms/user/UserDetailModal";
 
 export const UserManagement: VFC = memo(() => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { getUsers, loding, users } = useAllUsers();
+  const { onSelectUser, selectedUser } = useSelectUser();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => getUsers(), []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onClickUser = useCallback(() => onOpen(), []);
+  const onClickUser = useCallback((id: number) => {
+    onSelectUser({ id, users, onOpen });
+  }, [onSelectUser, users, onOpen]);
 
   return (
     <>
@@ -26,6 +30,7 @@ export const UserManagement: VFC = memo(() => {
           {users.map((user) => (
             <WrapItem key={user.id} mx='auto'>
               <UserCard
+                id={user.id}
                 imageUrl='https://source.unsplash.com/random'
                 userName={user.username}
                 fullName={user.name}
@@ -35,7 +40,7 @@ export const UserManagement: VFC = memo(() => {
           ))}
         </Wrap>
       )}
-      <UserDetailModal {...{ isOpen, onClose }} />
+      <UserDetailModal user={selectedUser} {...{ isOpen, onClose }} />
     </>
   )
 })
